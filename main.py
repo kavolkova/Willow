@@ -1,6 +1,6 @@
 import pandas as pd
 df = pd.read_csv('/Users/lizuckerman/Desktop/ppsfs.csv')
-
+#hey whats up
 class House:
 
   def __init__(self, owner, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, heating, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0,likes=0):
