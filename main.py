@@ -1,6 +1,6 @@
 import pandas as pd
 df = pd.read_csv('/Users/lizuckerman/Desktop/ppsfs.csv')
-
+#hey whats up
 class House:
 
   def __init__(self, owner, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, heating, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0,likes=0):
@@ -64,6 +64,14 @@ class User():
     else:
       pass
 
+<<<<<<< HEAD
 vanderbilt_414 = House('state', '414 Vanderbilt Ave', 500, 'Fort Greene', 11238, 4, 4, True, True, True, 50, False, 1, 4, 'House', False, 'D', 20)
+=======
+vanderbilt_414 = House.House('state', '414 Vanderbilt Ave', 500, 'Fort Greene', 11238, 4, 4, True, True, True, 50, False, 1, 4, 'House', False, 'D', 20)
+>>>>>>> 9d111add29dd9c55f43fab0c1231eb10fbf11b65
 vanderbilt_414.westimate()
-print(vanderbilt_414.price)
+print(vanderbilt_414.price())
+
+riverterrace_2_9F = House.House('state','2 River Terrace, 9F',300,'Battery Park City',10282,3,4,True,True,True,30,False,1,4,'Apartment',False,'C',20)
+riverterrace_2_9F.westimate()
+print(riverterrace_2_9F.price())
