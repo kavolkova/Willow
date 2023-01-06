@@ -64,11 +64,7 @@ class User():
     else:
       pass
 
-<<<<<<< HEAD
 vanderbilt_414 = House('state', '414 Vanderbilt Ave', 500, 'Fort Greene', 11238, 4, 4, True, True, True, 50, False, 1, 4, 'House', False, 'D', 20)
-=======
-vanderbilt_414 = House.House('state', '414 Vanderbilt Ave', 500, 'Fort Greene', 11238, 4, 4, True, True, True, 50, False, 1, 4, 'House', False, 'D', 20)
->>>>>>> 9d111add29dd9c55f43fab0c1231eb10fbf11b65
 vanderbilt_414.westimate()
 print(vanderbilt_414.price())
 
