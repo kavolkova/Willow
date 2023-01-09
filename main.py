@@ -1,5 +1,6 @@
-import pandas as pd
-df = pd.read_csv('ppsfs.csv')
+import csv
+import sys
+
 #hey whats up
 class House:
   def __init__(self, owner, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, heating, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0,likes=0):
@@ -29,10 +30,13 @@ class House:
     self.parking = parking
 
   def westimate(self):
-    i = df.loc(self.neighborhood)
-    print(i)
-    # ppsf = df[i][1]
-    # print(ppsf)
+    ppsf = 1000
+    with open('ppsfs.csv') as df:
+        data = csv.reader(df)
+        for row in data:
+            if row[0] == self.neighborhood:
+                ppsf = int(row[1])
+    self.price = ppsf*self.area
     #self.price = ppsf*self.area
     #price +=
 
@@ -66,19 +70,21 @@ houselist = {}
 
 vanderbilt_414 = House('state', '414 Vanderbilt Ave', 500, 'Fort Greene', 11238, 4, 4, True, True, True, 50, False, 1, 4, 'House', False, 'D', 20)
 houselist["vanderbilt_414"] = vanderbilt_414
-# vanderbilt_414.westimate()
-# print(vanderbilt_414.price())
+vanderbilt_414.westimate()
+print(vanderbilt_414.price)
 
 riverterrace_2_9F = House('state','2 River Terrace, 9F',300,'Battery Park City',10282,3,4,True,True,True,30,False,1,4,'Apartment',False,'C',20)
 houselist["riverterrace_2_9F"] = riverterrace_2_9F
 # riverterrace_2_9F.westimate()
 # print(riverterrace_2_9F.price())
 
-housesearch = input("please type in the name of the street, street number, and apartment number if needed, all separated with underscores.")
-if housesearch in houselist.keys():
-    print(f"welcome to the page for {housesearch}.")
-    houselist[housesearch].westimate()
-    print(houselist[housesearch].price())
-else:
-    print(houselist)
-    print('epic fail')
+
+
+# housesearch = input("please type in the name of the street, street number, and apartment number if needed, all separated with underscores.")
+# if housesearch in houselist.keys():
+#     print(f"welcome to the page for {housesearch}.")
+#     houselist[housesearch].westimate()
+#     print(houselist[housesearch].price())
+# else:
+#     print(houselist)
+#     print('epic fail')
