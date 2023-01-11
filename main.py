@@ -2,7 +2,7 @@ import csv
 import hashlib
 
 class House:
-  def __init__(self, owner, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False,likes=0):
+  def __init__(self, owner, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0):
     #ints
     self.price = int(price) #if no price is listed, will be 0 unti westimate is calculated
     self.area = int(area)
@@ -50,11 +50,11 @@ class House:
 
 
 
-class User():
-  def __init__(self, username, password, type=""):
-    self.username = username
-    self.password = str(hashlib.sha256(password.encode()).hexdigest())
-
+class Account():
+    def __init__(self, username, password):
+        self.username = username
+        self.password = str(hashlib.sha256(password.encode()).hexdigest())
+        self.houses = {}
 
 houselist = {}
 
