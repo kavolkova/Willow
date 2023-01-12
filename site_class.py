@@ -50,20 +50,20 @@ class House:
 
 
 
-class Account():
+class Account:
     def __init__(self, username, password):
         self.username = username
         self.password = str(hashlib.sha256(password.encode()).hexdigest())
         self.houses = {}
 
-class Site():
+class Site:
 
     def __init__(self):
         self.accounts = {}
         self.houses = {}
 
     def addAccount(self, username, password):
-        newaccount = main.Account(username, password)
+        newaccount = Account(username, password)
         self.accounts[username] = newaccount
 
     def login(self,username,password):
@@ -73,9 +73,11 @@ class Site():
           return False
 
     def list_house(self, username, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0):
-        self.houses[address] = main.House(username, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0)
+        self.houses[address] = House(username, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0)
         account = self.accounts[username]
         account.houses[address] = self.houses[address]
+
+site = Site()
 
 def menu():
     current = None
@@ -85,12 +87,12 @@ def menu():
         if choice == '1':
             username = input('create a username -> ')
             password = input('create a password -> ')
-            Site.addAccount(username, password)
+            site.addAccount(username, password)
 
         if choice == '2':
             username = input('enter your username -> ')
             password = input('enter your password -> ')
-            if Site.login(username, password):
+            if site.login(username, password):
                 current = username
                 print('logged in')
             else:
@@ -99,13 +101,14 @@ def menu():
         if choice == '3':
             if current:
                 info = input('enter this house information, separated by commas: address, area, neighborhood, zipcode, beds, baths, washer/dryer (T/F), air/conditioning (T/F), outdoor_space (in sqft), parking (T/F), acreage, number of floors, type, furnished (T/F), energy efficiency rating, storage space (sqft), price. If you do not know the price, leave that area blank. -> ')
-                info = info.split(',')
-                Site.list_house(current, (x for x in info))
-                account = Site.accounts[username]
-                print('house', account.houses[-1], 'added')
+                info = info.split(', ')
+                site.list_house(current, *info)
+                account = site.accounts[username]
+                print(account)
+                print('house', info[0], 'added')
                 west = input('would you like Willow to calculate a Westimate (TM) for this house in place of the current price? (yes/no) -> ')
                 if west == 'yes':
-                    house = account.houses[-1]
+                    house = account.houses[info[0]]
                     house.westimate()
                     print('the Westimate (TM) is', house.price)
                 else:
