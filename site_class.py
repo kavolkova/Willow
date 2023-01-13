@@ -1,5 +1,6 @@
 import csv
 import hashlib
+import shelve
 
 class House:
   def __init__(self, owner, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0):
@@ -56,6 +57,7 @@ class Account:
         self.password = str(hashlib.sha256(password.encode()).hexdigest())
         self.houses = {}
 
+
 class Site:
 
     def __init__(self):
@@ -65,6 +67,7 @@ class Site:
     def addAccount(self, username, password):
         newaccount = Account(username, password)
         self.accounts[username] = newaccount
+        
 
     def login(self,username,password):
         if username in self.accounts and self.accounts[username].password == str(hashlib.sha256(password.encode()).hexdigest()): #checks if account exists and password is correct
