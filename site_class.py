@@ -57,6 +57,7 @@ class Account:
         self.username = username
         self.password = str(hashlib.sha256(password.encode()).hexdigest())
         self.houses = {}
+        self.offers = {}
 
 
 class Site:
@@ -87,12 +88,37 @@ class Site:
             count+=1
         return count
 
+def search_menu(current, house):
+    print(f"this house's address is {house.address}, and the current listed price on this house is ${house.price}")
+    print(f"this house has {house.likes} likes")
+    seemore = input('would you liek to see more about the house?')
+    if seemore == 'yes':
+        print(f"the house's address is {house.address}, in {house.neighborhood}. It has an area of {house.area} sq ft, with {house.storage_space} sq ft of storage space and {house.outdoor_space} sq ft of outdoor space.")
+
+    else:
+        print('ok')
+    like = input('would you like to place a like on this house? (yes/no) -> ')
+    if like == "yes":
+        house.likes +=1
+        print(f"this house now has {house.likes} likes")
+    else:
+        print('ok')
+
+    placebid = input('would you like to purchase this house?')
+    if placebid == 'yes':
+        bid = input('enter your offer amount -> ')
+        email = input('enter your preferred email address to be contacted for the house -> ')
+        owner = house.owner
+        owner.offers[current] = [bid]
+        owner.offers[current].append(email)
+        print('the owner has been alerted to your bid.')
+
 site = Site()
 
 def menu():
     current = None
     while True:
-        choice = input('select: (1) create an account (2) login (3) list house (4) edit house (5) search houses' )
+        choice = input('select: (1) create an account (2) login (3) list house (4) edit house (5) search houses (6) logout -> ' )
 
         if choice == '1':
             username = input('create a username -> ')
@@ -126,29 +152,61 @@ def menu():
 
         if choice =='5':
             if current:
-                whichhouse = input('enter the address of the house you want to look at -> ')
-                if whichhouse in site.houses:
-                    print(f"the current listed price on this house is ${site.houses[whichhouse].price}")
-                    print(f"this house has {site.houses[whichhouse].likes} likes")
-                    seemore = input('would you liek to see more about the house?')
-                    if seemore == 'yes':
-                        print(f"the house's address is {site.houses[whichhouse].address}, in {site.houses[whichhouse].neighborhood}. It has an area of {site.houses[whichhouse].area} sq ft, with {site.houses[whichhouse].storage_space} sq ft of storage space and {site.houses[whichhouse].outdoor_space} sq ft of outdoor space.")
-
+                searchtype = input('select: (1) search for a specific address (2) search by attribute -> ')
+                if searchtype == '1':
+                    whichhouse = input('enter the address of the house you want to look at -> ')
+                    if whichhouse in site.houses:
+                        house = site.houses[whichhouse]
+                        search_menu(current, house)
                     else:
-                        print('ok')
-                    like = input('would you like to place a like on this house? (yes/no) -> ')
-                    if like == "yes":
-                        site.houses[whichhouse].likes +=1
-                        print(f"this house now has {site.houses[whichhouse].likes} likes")
-                    else:
-                        print('ok')
-
-
-                    placebid = input('would you like to purchase this house?')
-                    if placebid == 'yes':
-                        #idk what to do here tbh....
+                        print ('no')
                 else:
-                    print ('no')
+                    attribute = input('select which attribute you would like to search with: (1) all houses (2) price range (3) neighborhood (4) area range -> ')
+                    if attribute == '1':
+                        for house in site.houses:
+                            print(f"address: {site.houses[house].address}, price: ${site.houses[house].price}, area: {site.houses[house].area} sqft")
+                            more = input('would you like more info? (yes/no) -> ')
+                            if more == 'yes':
+                                search_menu(current, site.houses[house])
+                            else:
+                                pass
+
+                    elif attribute == '2':
+                        low = int(input('input lowest price ($) -> '))
+                        high = int(input('input highest price ($) -> '))
+                        for house in site.houses:
+                            if low < site.houses[house].price < high:
+                                print(f"address: {site.houses[house].address}, price: ${site.houses[house].price}, area: {site.houses[house].area} sqft")
+                                more = input('would you like more info? (yes/no) -> ')
+                                if more == 'yes':
+                                    search_menu(current, site.houses[house])
+                                else:
+                                    pass
+                    elif attribute == '2':
+                        neighborhood = input('enter the name of the desired neighborhood -> ')
+                        for house in site.houses:
+                            if lower(site.houses[house].neighborhood) == lower(neighborhood):
+                                print(f"address: {site.houses[house].address}, price: ${site.houses[house].price}, area: {site.houses[house].area} sqft")
+                                more = input('would you like more info? (yes/no) -> ')
+                                if more == 'yes':
+                                    search_menu(current, site.houses[house])
+                                else:
+                                    pass
+                    else:
+                        low = int(input('input lowest area (sqft) -> '))
+                        high = int(input('input highest area (sqft) -> '))
+                        for house in site.houses:
+                            if low < site.houses[house].area < high:
+                                print(f"address: {site.houses[house].address}, price: ${site.houses[house].price}, area: {site.houses[house].area} sqft")
+                                more = input('would you like more info? (yes/no) -> ')
+                                if more == 'yes':
+                                    search_menu(current, site.houses[house])
+                                else:
+                                    pass
+
+        if choice == '6':
+            break
+
 
 #2r, 100, Battery Park City, 10282, 2, 2, True, True, 100, True, 1, 1, Apartment, True, A, 10, 10
 menu()
