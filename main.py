@@ -119,7 +119,7 @@ def search_menu(current, house):
         bid = input('enter your offer amount -> ')
         email = input('enter your preferred email address to be contacted for the house -> ')
         owner = house.owner
-        owner_acc = self.accounts[owner]
+        owner_acc = site.accounts[owner]
         owner_acc.offers[current] = [bid]
         owner_acc.offers[current].append(email)
         print('the owner has been alerted to your bid.')
