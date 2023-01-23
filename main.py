@@ -131,7 +131,7 @@ site = Site()
 def menu():
     current = None
     while True:
-        choice = input('select: (1) create an account (2) login (3) list house (4) edit house (5) search houses (6) logout -> ' )
+        choice = input('select: (1) create an account (2) login (3) list house (4) edit house (5) search houses (6) see offers (7) logout -> ' )
 
         if choice == '1':
             site.accounts = shelve.open('accountsdb')
@@ -265,6 +265,14 @@ def menu():
                 print('not logged in')
 
         if choice == '6':
+            site.accounts = shelve.open('accountsdb')
+            site.houses = shelve.open('housesdb')
+            for offer in self.accounts[current].offers:
+                print(f"offer amt: {offer[0]}, offerer email: {offer[1]}")
+            site.accounts.close()
+            site.houses.close()
+
+        if choice == '7':
             break
 
 menu()
