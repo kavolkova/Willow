@@ -62,56 +62,48 @@ class Account:
 class Site:
 
     def __init__(self):
-        self.accounts = {}
-        self.houses = {}
+        self.accounts = shelve.open('accountsdb')
+        self.houses = shelve.open('housesdb')
 
     def addAccount(self, username, password):
-        accs = shelve.open('accs', writeback = True)
-        newaccount = Account(username, password)
-        self.accounts[username] = newaccount
-        accs[username]= [password]
-        accs[username].append(newaccount)
-        accs[username].append({})
-        accs.close()
+        self.accounts = shelve.open('accountsdb', writeback = True)
+        if username not in self.accounts:
+            newaccount = Account(username, password)
+            self.accounts[username] = newaccount
+        else:
+            raise NameError
+        self.accounts.close()
 
 
     def login(self,username,password):
-        accs = shelve.open('accs', writeback = True)
-        if username in accs and accs[username][0] == str(hashlib.sha256(password.encode()).hexdigest()): #checks if account exists and password is correct
+        self.accounts = shelve.open('accountsdb')
+        acc = self.accounts[username]
+        if username in self.accounts and acc.password == str(hashlib.sha256(password.encode()).hexdigest()): #checks if account exists and password is correct
           return True
-          accs.close()
         else:
           return False
-          accs.close()
+        self.accounts.close()
 
 
     def list_house(self, username, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0):
-        accs = shelve.open('accs',writeback = True)
+        self.accounts = shelve.open('accountsdb', writeback = True)
+        self.houses = shelve.open('housesdb', writeback = True)
         self.houses[address] = House(username, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0)
-        accs[username][2][address] = self.houses[address]
-        print(f"list house: {accs[username][2]}")
-        accs.close()
+        acc = self.accounts[username]
+        acc.houses[address] = self.houses[address]
+        print(f"list house: {acc.houses[address]}")
+        site.accounts.close()
+        site.houses.close()
 
-        #self.accounts[username].houses[address] = self.houses[address]
-
-
-    def countlikes(self,username,address):
-        accs = shelve.open('accs', writeback = True)
-        count = 0
-        # for item in self.houses[address].likes:
-        #     count+=1
-        # return count
-        for item in accs[username][2].get(address).likes:
-            count+=1
-        return count
-        accs.close()
 
 def search_menu(current, house):
+    site.accounts = shelve.open('accountsdb', writeback = True)
+    site.houses = shelve.open('housesdb')
     print(f"this house's address is {house.address}, and the current listed price on this house is ${house.price}")
     print(f"this house has {house.likes} likes")
     seemore = input('would you liek to see more about the house?')
     if seemore == 'yes':
-        print(f"the house's address is {house.address}, in {house.neighborhood}. It has an area of {house.area} sq ft, with {house.storage_space} sq ft of storage space and {house.outdoor_space} sq ft of outdoor space.")
+        print(f"the house's address is {house.address}, in {house.neighborhood}. It has an area of {house.area} sq ft, with {house.storage_space} sq ft of storage space and {house.outdoor_space} sq ft of outdoor space. Its energy efficiency rating is {house.energy_efficiency}")
 
     else:
         print('ok')
@@ -122,32 +114,41 @@ def search_menu(current, house):
     else:
         print('ok')
 
-    placebid = input('would you like to purchase this house?')
+    placebid = input('would you like to purchase this house? -> ')
     if placebid == 'yes':
         bid = input('enter your offer amount -> ')
         email = input('enter your preferred email address to be contacted for the house -> ')
         owner = house.owner
-        owner.offers[current] = [bid]
-        owner.offers[current].append(email)
+        owner_acc = self.accounts[owner]
+        owner_acc.offers[current] = [bid]
+        owner_acc.offers[current].append(email)
         print('the owner has been alerted to your bid.')
+        site.accounts.close()
+        site.houses.close()
 
 site = Site()
 
 def menu():
-
-
     current = None
     while True:
         choice = input('select: (1) create an account (2) login (3) list house (4) edit house (5) search houses (6) logout -> ' )
 
         if choice == '1':
+            site.accounts = shelve.open('accountsdb')
+            site.houses = shelve.open('housesdb')
             username = input('create a username -> ')
             password = input('create a password -> ')
-            encrypted_password = str(hashlib.sha256(password.encode()).hexdigest())
-            site.addAccount(username, encrypted_password)
+            try:
+                site.addAccount(username, password)
+            except NameError:
+                print('that username already exists')
+            site.accounts.close()
+            site.houses.close()
 
 
         if choice == '2':
+            site.accounts = shelve.open('accountsdb')
+            site.houses = shelve.open('housesdb')
             username = input('enter your username -> ')
             password = input('enter your password -> ')
             if site.login(username, password):
@@ -155,33 +156,58 @@ def menu():
                 print('logged in')
             else:
                 print("invalid user or password")
+            site.accounts.close()
+            site.houses.close()
 
         if choice == '3':
             if current:
-                accs = shelve.open('accs', writeback = True)
+                site.accounts = shelve.open('accountsdb')
+                site.houses = shelve.open('housesdb')
                 info = input('enter this house information, separated by commas: address, area, neighborhood, zipcode, beds, baths, washer/dryer (T/F), air/conditioning (T/F), outdoor_space (in sqft), parking (T/F), acreage, number of floors, type, furnished (T/F), energy efficiency rating, storage space (sqft), price. If you do not know the price, leave that area blank. -> ')
                 info = info.split(', ')
-                print(f"menu 1 {accs[current][2]}")
-                if info[0] not in accs[current][2].keys():
-                    site.list_house(current, *info)
-                else:
-                    print('sorry, that address has already been listed by someone.')
-                print('house', info[0], 'added')
-                print(f"menu 2 {accs[current][2]}")
-                accs.sync()
+                site.accounts.close()
+                site.houses.close()
+                site.list_house(current, *info)
+                site.accounts = shelve.open('accountsdb', writeback = True)
+                site.houses = shelve.open('housesdb', writeback = True)
                 west = input('would you like Willow to calculate a Westimate (TM) for this house in place of the current price? (yes/no) -> ')
                 if west == 'yes':
-                    print(f"west {accs[current][2]}")
-                    house = accs[current][2][info[0]]
+                    address = info[0]
+                    house = site.houses[address]
                     house.westimate()
                     print('the Westimate (TM) is', house.price)
-                    accs.close()
                 else:
                     print('ok, we will not calculate a Westimate (TM)')
-                    accs.close()
+                site.accounts.close()
+                site.houses.close()
+            else:
+                print('not logged in')
+
+        if choice == '4':
+            site.accounts = shelve.open('accountsdb', writeback = True)
+            site.houses = shelve.open('housesdb', writeback = True)
+            address = input('input address of house to edit -> ')
+            house = site.houses[address]
+            if house.owner == current:
+                attribute = input('input attribute to edit -> ')
+                value = input('input new value -> ')
+                house.attribute = value
+                if attribute == 'price':
+                    west = input('would you like to calculate Westimate (TM)? (yes/no) -> ')
+                    if west == 'yes':
+                        house.westimate()
+                        print('the Westimate (TM) is', house.price)
+                    else:
+                        print('ok, we will not calculate a Westimate (TM)')
+            else:
+                print('you do not own this house')
+
+
 
         if choice =='5':
             if current:
+                site.accounts = shelve.open('accountsdb')
+                site.houses = shelve.open('housesdb')
                 searchtype = input('select: (1) search for a specific address (2) search by attribute -> ')
                 if searchtype == '1':
                     whichhouse = input('enter the address of the house you want to look at -> ')
@@ -212,7 +238,7 @@ def menu():
                                     search_menu(current, site.houses[house])
                                 else:
                                     pass
-                    elif attribute == '2':
+                    elif attribute == '3':
                         neighborhood = input('enter the name of the desired neighborhood -> ')
                         for house in site.houses:
                             if lower(site.houses[house].neighborhood) == lower(neighborhood):
@@ -233,20 +259,12 @@ def menu():
                                     search_menu(current, site.houses[house])
                                 else:
                                     pass
+                site.accounts.close()
+                site.houses.close()
+            else:
+                print('not logged in')
 
         if choice == '6':
             break
 
-
-<<<<<<< HEAD
-=======
-                    placebid = input('would you like to purchase this house?')
-                    if placebid == 'yes':
-                        print('hi')
-                        #idk what to do here tbh....
-                else:
-                    print ('no')
-
->>>>>>> 273d52c38941a73174d24817b1b11eaab99f606d
-#2r, 100, Battery Park City, 10282, 2, 2, True, True, 100, True, 1, 1, Apartment, True, A, 10, 10
 menu()
