@@ -51,7 +51,6 @@ class House:
 
 
 
-
 class Account:
     def __init__(self, username, password):
         self.username = username
@@ -66,30 +65,51 @@ class Site:
         self.houses = {}
 
     def addAccount(self, username, password):
+        accs = shelve.open('accs', writeback = True)
         newaccount = Account(username, password)
         self.accounts[username] = newaccount
+        accs[username]= [password]
+        accs[username].append(newaccount)
+        accs[username].append({})
+        accs.close()
 
 
     def login(self,username,password):
-        if username in self.accounts and self.accounts[username].password == str(hashlib.sha256(password.encode()).hexdigest()): #checks if account exists and password is correct
+        accs = shelve.open('accs', writeback = True)
+        if username in accs and accs[username][0] == str(hashlib.sha256(password.encode()).hexdigest()): #checks if account exists and password is correct
           return True
+          accs.close()
         else:
           return False
+          accs.close()
+
 
     def list_house(self, username, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0):
+        accs = shelve.open('accs',writeback = True)
         self.houses[address] = House(username, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0)
-        account = self.accounts[username]
-        account.houses[address] = self.houses[address]
+        accs[username][2][address] = self.houses[address]
+        print(f"list house: {accs[username][2]}")
+        accs.close()
 
-    def countlikes(self,address):
+        #self.accounts[username].houses[address] = self.houses[address]
+
+
+    def countlikes(self,username,address):
+        accs = shelve.open('accs', writeback = True)
         count = 0
-        for item in self.houses[address].likes:
+        # for item in self.houses[address].likes:
+        #     count+=1
+        # return count
+        for item in accs[username][2].get(address).likes:
             count+=1
         return count
+        accs.close()
 
 site = Site()
 
 def menu():
+
+
     current = None
     while True:
         choice = input('select: (1) create an account (2) login (3) list house (4) edit house (5) search houses' )
@@ -97,7 +117,9 @@ def menu():
         if choice == '1':
             username = input('create a username -> ')
             password = input('create a password -> ')
-            site.addAccount(username, password)
+            encrypted_password = str(hashlib.sha256(password.encode()).hexdigest())
+            site.addAccount(username, encrypted_password)
+
 
         if choice == '2':
             username = input('enter your username -> ')
@@ -110,19 +132,27 @@ def menu():
 
         if choice == '3':
             if current:
+                accs = shelve.open('accs', writeback = True)
                 info = input('enter this house information, separated by commas: address, area, neighborhood, zipcode, beds, baths, washer/dryer (T/F), air/conditioning (T/F), outdoor_space (in sqft), parking (T/F), acreage, number of floors, type, furnished (T/F), energy efficiency rating, storage space (sqft), price. If you do not know the price, leave that area blank. -> ')
                 info = info.split(', ')
-                site.list_house(current, *info)
-                account = site.accounts[username]
-                print(account)
+                print(f"menu 1 {accs[current][2]}")
+                if info[0] not in accs[current][2].keys():
+                    site.list_house(current, *info)
+                else:
+                    print('sorry, that address has already been listed by someone.')
                 print('house', info[0], 'added')
+                print(f"menu 2 {accs[current][2]}")
+                accs.sync()
                 west = input('would you like Willow to calculate a Westimate (TM) for this house in place of the current price? (yes/no) -> ')
                 if west == 'yes':
-                    house = account.houses[info[0]]
+                    print(f"west {accs[current][2]}")
+                    house = accs[current][2][info[0]]
                     house.westimate()
                     print('the Westimate (TM) is', house.price)
+                    accs.close()
                 else:
                     print('ok, we will not calculate a Westimate (TM)')
+                    accs.close()
 
         if choice =='5':
             if current:
@@ -146,6 +176,7 @@ def menu():
 
                     placebid = input('would you like to purchase this house?')
                     if placebid == 'yes':
+                        print('hi')
                         #idk what to do here tbh....
                 else:
                     print ('no')
