@@ -15,6 +15,7 @@ class House:
     self.storage_space = int(storage_space)
     self.ppsf = 750
     self.ppsf_outdoor = self.ppsf/2
+    self.likes = likes
 
     #strings
     self.owner = owner
@@ -67,7 +68,7 @@ class Site:
     def addAccount(self, username, password):
         newaccount = Account(username, password)
         self.accounts[username] = newaccount
-        
+
 
     def login(self,username,password):
         if username in self.accounts and self.accounts[username].password == str(hashlib.sha256(password.encode()).hexdigest()): #checks if account exists and password is correct
@@ -79,6 +80,12 @@ class Site:
         self.houses[address] = House(username, address, area, neighborhood, zipcode, beds, baths, washer_dryer, air_conditioning, outdoor_space, parking, acreage, num_floors, type, furnished, energy_efficiency,storage_space, price = 0, listed = False, likes=0)
         account = self.accounts[username]
         account.houses[address] = self.houses[address]
+
+    def countlikes(self,address):
+        count = 0
+        for item in self.houses[address].likes:
+            count+=1
+        return count
 
 site = Site()
 
@@ -117,4 +124,31 @@ def menu():
                 else:
                     print('ok, we will not calculate a Westimate (TM)')
 
+        if choice =='5':
+            if current:
+                whichhouse = input('enter the address of the house you want to look at -> ')
+                if whichhouse in site.houses:
+                    print(f"the current listed price on this house is ${site.houses[whichhouse].price}")
+                    print(f"this house has {site.houses[whichhouse].likes} likes")
+                    seemore = input('would you liek to see more about the house?')
+                    if seemore == 'yes':
+                        print(f"the house's address is {site.houses[whichhouse].address}, in {site.houses[whichhouse].neighborhood}. It has an area of {site.houses[whichhouse].area} sq ft, with {site.houses[whichhouse].storage_space} sq ft of storage space and {site.houses[whichhouse].outdoor_space} sq ft of outdoor space.")
+
+                    else:
+                        print('ok')
+                    like = input('would you like to place a like on this house? (yes/no) -> ')
+                    if like == "yes":
+                        site.houses[whichhouse].likes +=1
+                        print(f"this house now has {site.houses[whichhouse].likes} likes")
+                    else:
+                        print('ok')
+
+
+                    placebid = input('would you like to purchase this house?')
+                    if placebid == 'yes':
+                        #idk what to do here tbh....
+                else:
+                    print ('no')
+
+#2r, 100, Battery Park City, 10282, 2, 2, True, True, 100, True, 1, 1, Apartment, True, A, 10, 10
 menu()
